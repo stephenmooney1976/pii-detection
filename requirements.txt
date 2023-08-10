@@ -3,3 +3,4 @@ presidio_analyzer
 presidio_anonymizer
 presidio_image_redactor
 spacy
+dotenv
