@@ -10,10 +10,9 @@ from dotenv import load_dotenv
 import json
 from kafka import KafkaProducer
 import os
-import time
 
 """ read in information about started redpanda environment """
-load_dotenv('redpanda.env')
+load_dotenv('redpanda.env', override=True)
 
 print( os.environ.get('RPK_BROKERS'))
 """ create producer """
@@ -34,13 +33,12 @@ def on_error(e):
 with open('../data/pii_records.json') as f:
   l_json_data = json.load(f)
 
-""" push messages to toic from OpenAI """
+""" push messages to topic from OpenAI """
 for ii in range(len(l_json_data)):
-  msg = dict(id=ii, inputs=l_json_data[ii]['inputs'])
+  msg = {'id': ii, 'inputs': l_json_data[ii]['inputs']}
   future = producer.send(topic, msg)
   future.add_callback(on_success)
   future.add_errback(on_error)
-  time.sleep(0.100) # sleep for 1/10 sec to cause a delay.
 
 """ flush and close producer """
 producer.flush()
