@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug 9 13:21:29 2023
+
+@author: Stephen Mooney
+"""
 
 from dotenv import load_dotenv
 import json
@@ -9,13 +15,14 @@ import time
 """ read in information about started redpanda environment """
 load_dotenv('redpanda.env')
 
+print( os.environ.get('RPK_BROKERS'))
 """ create producer """
 producer = KafkaProducer(
     bootstrap_servers = os.environ.get('RPK_BROKERS'),
     value_serializer=lambda m: json.dumps(m).encode('ascii')
 )
 
-topic = "orders"
+topic = "random-pii-text"
 
 def on_success(metadata):
   print(f"Message produced to topic '{metadata.topic}' at offset {metadata.offset}")
@@ -33,7 +40,7 @@ for ii in range(len(l_json_data)):
   future = producer.send(topic, msg)
   future.add_callback(on_success)
   future.add_errback(on_error)
-  time.sleep(0.100) #
+  time.sleep(0.100) # sleep for 1/10 sec to cause a delay.
 
 """ flush and close producer """
 producer.flush()

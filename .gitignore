@@ -2,3 +2,4 @@ bert-base-NER/
 .ipynb_checkpoints/
 .env
 redpanda/redpanda.env
+redpanda.env

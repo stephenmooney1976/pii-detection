@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug 9 13:21:29 2023
+
+@author: Stephen Mooney
+"""
 
 from dotenv import load_dotenv
 import json
