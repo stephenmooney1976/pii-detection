@@ -1,3 +1,4 @@
 bert-base-NER/
 data/
 .ipynb_checkpoints/
+.env
