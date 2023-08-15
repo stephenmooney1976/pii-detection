@@ -89,7 +89,10 @@ This can also be done by using the commmand line:
 # start Redpanda
 cd redpanda
 ./start_container.bash
+# create Kafka producer
 python3 json_producer.py
+# create Kafka consumer
 python3 json_consumer.py
+# stop Kafka (Redpanda) and clean up resources
 ./stop_container.bash
 ```
