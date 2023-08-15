@@ -1,0 +1,112 @@
+openapi: 3.0.0
+
+servers:
+  - url: /
+
+info:
+  description: This is a simple API that anonymizes Personally Identifiable Information (PII) from text
+  version: "1.0.0"
+  title: PII Anonymization
+  contact:
+    email: stephen.mooney@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+paths:
+  /:
+    get:
+      summary: Root requests will redirect to the OpenAPI definition
+      operationId: apis.api_definition.class_instance.swaggerRedirect
+      responses:
+        200:
+          description: OK
+  /v1/singleAnonymizePII:
+    put:
+      summary: Takes in free-form text (with or without PII)
+      description: External endpoint for PII anonymization
+      operationId: apis.api_definition.class_instance.singleAnonymizePII
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SinglePIIRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SinglePIIResponse'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /v1/multiAnonymizePII:
+    put:
+      summary: Takes in array of single anonymization requests
+      description: External endpoint for multiple PII anonymization
+      operationId: apis.api_definition.class_instance.multiAnonymizePII
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiPIIRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiPIIResponse'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+components:
+  schemas:
+
+    MultiPIIRequest:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SinglePIIRequest'
+
+    SinglePIIRequest:
+      type: object
+      required:
+        - recordId
+        - inputText
+      properties:
+        recordId:
+          type: string
+          description: source system or stream recordId
+          example: '12346XYZ'
+        inputText:
+          type: string
+          description: input text that should be anonymized
+          example: 'My name is Dee and my phone number is 312.555.1212'
+
+    MultiPIIResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SinglePIIResponse'
+
+    SinglePIIResponse:
+      type: object
+      properties:
+        recordId:
+          type: string
+        inputText:
+          type: string
+        outputText:
+          type: string
