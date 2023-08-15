@@ -4,5 +4,9 @@ presidio_anonymizer
 presidio_image_redactor
 spacy
 # for part 2
+connexion
+connexion[swagger-ui]
 flask
 flask-cors
+swagger_ui
+waitress

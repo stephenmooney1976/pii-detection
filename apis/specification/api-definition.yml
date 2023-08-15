@@ -1,9 +1,7 @@
 openapi: 3.0.0
 
 servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/STEPHENMOONEY/TextAnonymizer/1.0.0
+  - url: /
 
 info:
   description: This is a simple API that anonymizes Personally Identifiable Information (PII) from text
@@ -19,7 +17,7 @@ paths:
   /:
     get:
       summary: Root requests will redirect to the OpenAPI definition
-      operationId: api.class_instance.swaggerRedirect
+      operationId: apis.api_definition.class_instance.swaggerRedirect
       responses:
         200:
           description: OK
@@ -27,7 +25,7 @@ paths:
     put:
       summary: Takes in free-form text (with or without PII)
       description: External endpoint for PII anonymization
-      operationId: api.class_instance.singleAnonymizePII
+      operationId: apis.api_definition.class_instance.singleAnonymizePII
       requestBody:
         required: true
         content:
@@ -46,11 +44,11 @@ paths:
         '500':
           description: Internal Server Error
 
-  /v1/MultiAnonymizePII:
+  /v1/multiAnonymizePII:
     put:
       summary: Takes in array of single anonymization requests
       description: External endpoint for multiple PII anonymization
-      operationId: api.class_instance.multiAnonymizePII
+      operationId: apis.api_definition.class_instance.multiAnonymizePII
       requestBody:
         required: true
         content:
@@ -71,7 +69,7 @@ paths:
 
 components:
   schemas:
-  
+
     MultiPIIRequest:
       type: object
       properties:
@@ -79,7 +77,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SinglePIIRequest'
-            
+
     SinglePIIRequest:
       type: object
       required:
@@ -94,7 +92,7 @@ components:
           type: string
           description: input text that should be anonymized
           example: 'My name is Dee and my phone number is 312.555.1212'
-          
+
     MultiPIIResponse:
       type: object
       properties:
@@ -102,7 +100,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SinglePIIResponse'
-          
+
     SinglePIIResponse:
       type: object
       properties:
