@@ -3,3 +3,6 @@ presidio_analyzer
 presidio_anonymizer
 presidio_image_redactor
 spacy
+# for part 2
+flask
+flask-cors
