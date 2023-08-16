@@ -11,3 +11,6 @@ flask
 flask-cors
 swagger_ui
 waitress
+awslambdaric
+boto3
+awscli
