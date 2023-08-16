@@ -1,3 +1,4 @@
+tensorflow
 huggingface_hub
 presidio_analyzer
 presidio_anonymizer

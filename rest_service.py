@@ -9,6 +9,19 @@ Created on Tue Aug 15 14:53:18 2023
 import connexion
 from flask_cors import CORS
 from waitress import serve
+from huggingface_hub import snapshot_download
+
+repo_id = 'dslim/bert-base-NER'
+model_id = repo_id.split('/')[-1]
+
+snapshot_download(repo_id=repo_id, local_dir=model_id)
+
+import spacy
+
+try:
+  nlp_lg = spacy.load("en_core_web_lg")
+except ModuleNotFoundError:
+  spacy.cli.download(model="en_core_web_lg")
 
 """
 """
