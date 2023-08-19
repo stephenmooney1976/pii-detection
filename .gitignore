@@ -4,3 +4,4 @@ __pycache__/
 .env
 redpanda/redpanda.env
 redpanda.env
+KStreamsPii/target/
