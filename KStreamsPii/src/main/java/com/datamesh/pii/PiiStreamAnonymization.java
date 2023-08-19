@@ -92,43 +92,41 @@ public final class PiiStreamAnonymization {
     }
 
     public static void main(final String[] args) throws IOException {
-      final Properties props = getStreamsConfig(args);
+        final Properties props = getStreamsConfig(args);
 
-      try {
+        try {
 
-          URL url = new URL(restServiceUri);
-          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            URL url = new URL(restServiceUri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-          JSONObject piiObject = new JSONObject();
-          piiObject.put("recordId", "AAAA1234");
-          piiObject.put("inputText", "My phone number is 312.434.2415");
+            JSONObject piiObject = new JSONObject();
+            piiObject.put("recordId", "AAAA1234");
+            piiObject.put("inputText", "My phone number is 312.434.2415");
 
-          conn.setDoOutput(true);
-          conn.setRequestProperty("Content-Type", "application/json");
-          conn.setRequestMethod("PUT");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestMethod("PUT");
 
-          OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
-          out.write(piiObject.toString());
-          out.close();
+            OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
+            out.write(piiObject.toString());
+            out.close();
 
-          StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
 
-          if(conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-              InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
-              BufferedReader bufferedReader = new BufferedReader(streamReader);
-              String response = null;
-              while ((response = bufferedReader.readLine()) != null) {
-                  stringBuilder.append(response).append("\n");
-              }
-              bufferedReader.close();
-          }
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
+                BufferedReader bufferedReader = new BufferedReader(streamReader);
+                String response = null;
+                while ((response = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(response).append("\n");
+                }
+                bufferedReader.close();
+            }
 
-          System.out.println(stringBuilder.toString());
-          conn.disconnect();
-      } catch(Exception e) {
-          System.err.println("Error: " + e.getMessage());
-      }
+            System.out.println(stringBuilder.toString());
+            conn.disconnect();
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
-
-
 }
