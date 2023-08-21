@@ -2,5 +2,5 @@ bert-base-NER/
 .ipynb_checkpoints/
 __pycache__/
 .env
-redpanda/redpanda.env
-redpanda.env
+.idea/
+KStreamsPii/target/
