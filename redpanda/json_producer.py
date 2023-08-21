@@ -35,7 +35,7 @@ with open('../data/pii_records.json') as f:
 
 """ push messages to topic from OpenAI """
 for ii in range(len(l_json_data)):
-  msg = {'id': ii, 'inputs': l_json_data[ii]['inputs']}
+  msg = {'recordId': f"{ii}", 'inputText': l_json_data[ii]['inputs']}
   future = producer.send(topic, msg)
   future.add_callback(on_success)
   future.add_errback(on_error)

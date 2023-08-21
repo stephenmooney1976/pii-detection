@@ -2,11 +2,11 @@ package com.datamesh.pii;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public final class PiiStreamAnonymization {
     private static final String inputTopic = "random-pii-text";
@@ -38,7 +39,7 @@ public final class PiiStreamAnonymization {
 
         try {
             props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "streams-pii-anon");
-            props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+            props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:19092,localhost:29092,localhost:39092");
             props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
             props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
@@ -52,25 +53,34 @@ public final class PiiStreamAnonymization {
 
     private static void createAnonymizedPiiStream(final StreamsBuilder builder) {
         final KStream<String, String> source = builder.stream(inputTopic);
+        final KStream<String, String> target = builder.stream(outputTopic);
+
+        try {
+            source.mapValues(message -> anonymizePiiFromApi(new JSONObject(message)))
+                    .to(outputTopic);
+            //source.foreach((key, value) -> target.to(anonymizePiiFromApi(new JSONObject(value))));
+                    //System.out.printf("key = %d, value = %s%n",
+                    //key, anonymizePiiFromApi(new JSONObject(value)).toString()));
+                    //key, anonymizePiiFromApi(new ObjectMapper().readValue(value, RawInput.class))));
+        } catch(Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
-    private static String anonymizePiiFromApi(final String recordId, final String inputText) {
+    private static String anonymizePiiFromApi(JSONObject rawInput) {
+
         StringBuilder sb = new StringBuilder();
 
         try {
             URL url = new URL(restServiceUri);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            JSONObject piiObject = new JSONObject();
-            piiObject.put("recordId", recordId);
-            piiObject.put("inputText", inputText);
-
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestMethod("PUT");
 
             OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
-            out.write(piiObject.toString());
+            out.write(rawInput.toString());
             out.close();
 
             if(conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
@@ -88,45 +98,31 @@ public final class PiiStreamAnonymization {
         }
 
         return sb.toString();
-
     }
 
     public static void main(final String[] args) throws IOException {
         final Properties props = getStreamsConfig(args);
+        final StreamsBuilder builder = new StreamsBuilder();
+        createAnonymizedPiiStream(builder);
+        final KafkaStreams streams = new KafkaStreams(builder.build(), props);
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        // attach shutdown handler to catch control-c
+        Runtime.getRuntime().addShutdownHook(new Thread("pii-anon-shutdown-hook") {
+            @Override
+            public void run() {
+                streams.close();
+                latch.countDown();
+            }
+        });
 
         try {
-
-            URL url = new URL(restServiceUri);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-            JSONObject piiObject = new JSONObject();
-            piiObject.put("recordId", "AAAA1234");
-            piiObject.put("inputText", "My phone number is 312.434.2415");
-
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestMethod("PUT");
-
-            OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
-            out.write(piiObject.toString());
-            out.close();
-
-            StringBuilder stringBuilder = new StringBuilder();
-
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
-                BufferedReader bufferedReader = new BufferedReader(streamReader);
-                String response = null;
-                while ((response = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(response).append("\n");
-                }
-                bufferedReader.close();
-            }
-
-            System.out.println(stringBuilder.toString());
-            conn.disconnect();
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            streams.start();
+            latch.await();
+        } catch (final Throwable e) {
+            System.exit(1);
         }
+
+        System.exit(0);
     }
 }
