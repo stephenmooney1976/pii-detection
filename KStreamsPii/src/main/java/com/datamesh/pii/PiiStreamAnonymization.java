@@ -53,15 +53,11 @@ public final class PiiStreamAnonymization {
 
     private static void createAnonymizedPiiStream(final StreamsBuilder builder) {
         final KStream<String, String> source = builder.stream(inputTopic);
-        final KStream<String, String> target = builder.stream(outputTopic);
+
 
         try {
             source.mapValues(message -> anonymizePiiFromApi(new JSONObject(message)))
                     .to(outputTopic);
-            //source.foreach((key, value) -> target.to(anonymizePiiFromApi(new JSONObject(value))));
-                    //System.out.printf("key = %d, value = %s%n",
-                    //key, anonymizePiiFromApi(new JSONObject(value)).toString()));
-                    //key, anonymizePiiFromApi(new ObjectMapper().readValue(value, RawInput.class))));
         } catch(Exception e) {
             System.err.println(e.getMessage());
         }
@@ -86,7 +82,7 @@ public final class PiiStreamAnonymization {
             if(conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
                 BufferedReader bufferedReader = new BufferedReader(streamReader);
-                String response = null;
+                String response;
                 while ((response = bufferedReader.readLine()) != null) {
                     sb.append(response).append("\n");
                 }
