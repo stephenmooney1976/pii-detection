@@ -1,7 +1,9 @@
 package com.datamesh.pii;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
@@ -19,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 public final class PiiStreamAnonymization {
@@ -38,12 +41,21 @@ public final class PiiStreamAnonymization {
         }
 
         try {
-            props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, "streams-pii-anon");
+
+            //
+            // random APPLICATION_ID_CONFIG allows stream to reprocess from the beginning. This is typically
+            // not desirable, but was useful for this demo.
+            String applicationId = UUID.randomUUID().toString();
+            props.putIfAbsent(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
             props.putIfAbsent(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:19092,localhost:29092,localhost:39092");
             props.putIfAbsent(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
             props.putIfAbsent(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
             props.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            props.putIfAbsent(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            props.putIfAbsent(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+            props.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
+
         } catch(Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
@@ -54,10 +66,8 @@ public final class PiiStreamAnonymization {
     private static void createAnonymizedPiiStream(final StreamsBuilder builder) {
         final KStream<String, String> source = builder.stream(inputTopic);
 
-
         try {
-            source.mapValues(message -> anonymizePiiFromApi(new JSONObject(message)))
-                    .to(outputTopic);
+            source.mapValues(message -> anonymizePiiFromApi(new JSONObject(message))).to(outputTopic);
         } catch(Exception e) {
             System.err.println(e.getMessage());
         }
@@ -99,7 +109,9 @@ public final class PiiStreamAnonymization {
     public static void main(final String[] args) throws IOException {
         final Properties props = getStreamsConfig(args);
         final StreamsBuilder builder = new StreamsBuilder();
+
         createAnonymizedPiiStream(builder);
+
         final KafkaStreams streams = new KafkaStreams(builder.build(), props);
         final CountDownLatch latch = new CountDownLatch(1);
 

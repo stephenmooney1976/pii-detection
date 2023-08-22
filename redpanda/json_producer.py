@@ -39,7 +39,7 @@ with open('../data/pii_records.json') as f:
 for ii in range(len(l_json_data)):
   msg = dict()
   key = f"{ii}_{str(uuid.uuid4())}"
-  msg = dict(recordId=ii, inputText=l_json_data[ii]['inputs'])
+  msg = dict(recordId=str(ii), inputText=l_json_data[ii]['inputs'])
 
   future = producer.send(topic, key=key, value=msg)
   future.add_callback(on_success)

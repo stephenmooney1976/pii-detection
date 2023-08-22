@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-L_TAG=pii-container
+L_TAG=pii-api-ontainer
 
 docker build -t ${L_TAG} .
 
