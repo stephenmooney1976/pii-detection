@@ -1,15 +1,19 @@
 package com.datamesh.pii;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.kstream.KStream;
 
+import org.apache.kafka.streams.kstream.internals.InternalStreamsBuilder;
+import org.apache.kafka.streams.kstream.internals.KStreamImpl;
+import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 import org.json.JSONObject;
+import org.springframework.util.ReflectionUtils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -17,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -106,7 +111,7 @@ public final class PiiStreamAnonymization {
         return sb.toString();
     }
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, IllegalAccessException {
         final Properties props = getStreamsConfig(args);
         final StreamsBuilder builder = new StreamsBuilder();
 
@@ -114,6 +119,8 @@ public final class PiiStreamAnonymization {
 
         final KafkaStreams streams = new KafkaStreams(builder.build(), props);
         final CountDownLatch latch = new CountDownLatch(1);
+
+        System.out.println(builder.build().describe());
 
         // attach shutdown handler to catch control-c
         Runtime.getRuntime().addShutdownHook(new Thread("pii-anon-shutdown-hook") {
