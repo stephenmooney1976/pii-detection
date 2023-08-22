@@ -10,15 +10,17 @@ from dotenv import load_dotenv
 import json
 from kafka import KafkaProducer
 import os
+import uuid
 
 """ read in information about started redpanda environment """
 load_dotenv('redpanda.env', override=True)
 
-print( os.environ.get('RPK_BROKERS'))
+
 """ create producer """
 producer = KafkaProducer(
     bootstrap_servers = os.environ.get('RPK_BROKERS'),
-    value_serializer=lambda m: json.dumps(m).encode('ascii')
+    key_serializer=lambda key: json.dumps(key).encode('ascii'),
+    value_serializer=lambda msg: json.dumps(msg).encode('ascii')
 )
 
 topic = "random-pii-text"
@@ -35,8 +37,11 @@ with open('../data/pii_records.json') as f:
 
 """ push messages to topic from OpenAI """
 for ii in range(len(l_json_data)):
-  msg = {'recordId': f"{ii}", 'inputText': l_json_data[ii]['inputs']}
-  future = producer.send(topic, msg)
+  msg = dict()
+  key = f"{ii}_{str(uuid.uuid4())}"
+  msg = dict(recordId=ii, inputText=l_json_data[ii]['inputs'])
+
+  future = producer.send(topic, key=key, value=msg)
   future.add_callback(on_success)
   future.add_errback(on_error)
 

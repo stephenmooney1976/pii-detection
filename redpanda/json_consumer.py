@@ -69,28 +69,26 @@ try:
         message_info = f"key: {message.key}, {message.value}"
 
         original_json = message.value
-        original_text = original_json['inputs']
 
-        analyzer_results = analyzer.analyze(text=original_text, language="en")
+        analyzer_results = analyzer.analyze(text=original_json['inputText'],
+                                                            language="en")
 
-        anonymized_text = anonymizer_engine.anonymize(text=original_text,
+        anonymized_text = anonymizer_engine.anonymize(text=original_json['inputText'],
                                                       analyzer_results=analyzer_results,
                                                       operators=operators)
 
-        original_json['inputs_anon'] = anonymized_text.text
+        original_json['outputText'] = anonymized_text.text
 
 
         anonymized_json.append(original_json)
 
 except Exception as e:
     print(f"Error occurred while consuming messages: {e}")
+    print(type(e).__name__)
 finally:
     consumer.close()
 
-zzz = anonymized_json[:5]
+aj = anonymized_json[:5]
 
-for z in zzz:
-  print(z['inputs'])
-
-for z in zzz:
-  print(z['inputs_anon'])
+for ii in aj:
+  print(str(ii))
