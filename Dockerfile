@@ -3,7 +3,14 @@ FROM python:3.11.4-bullseye
 USER root
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install build-essential curl -y
+
+# Get Rust
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+ENV PATH /root/.cargo/bin:$PATH
+
 RUN pip install -U pip
 
 RUN mkdir service_root
