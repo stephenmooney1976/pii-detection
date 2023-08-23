@@ -1,16 +1,15 @@
-tensorflow
+awscli
+awslambdaric
+boto3
+connexion
+connexion[swagger-ui]
+flask
+flask-cors
 huggingface_hub
 presidio_analyzer
 presidio_anonymizer
 presidio_image_redactor
 spacy
-# for part 2
-connexion
-connexion[swagger-ui]
-flask
-flask-cors
 swagger_ui
+tensorflow
 waitress
-awslambdaric
-boto3
-awscli
