@@ -6,14 +6,9 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.kstream.KStream;
 
-import org.apache.kafka.streams.kstream.internals.InternalStreamsBuilder;
-import org.apache.kafka.streams.kstream.internals.KStreamImpl;
-import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 import org.json.JSONObject;
-import org.springframework.util.ReflectionUtils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -21,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -68,6 +62,8 @@ public final class PiiStreamAnonymization {
         return props;
     }
 
+    //
+    // implementation of KStream API
     private static void createAnonymizedPiiStream(final StreamsBuilder builder) {
         final KStream<String, String> source = builder.stream(inputTopic);
 
@@ -78,6 +74,8 @@ public final class PiiStreamAnonymization {
         }
     }
 
+    //
+    // method to call REST API and do data transformation.
     private static String anonymizePiiFromApi(JSONObject rawInput) {
 
         StringBuilder sb = new StringBuilder();
