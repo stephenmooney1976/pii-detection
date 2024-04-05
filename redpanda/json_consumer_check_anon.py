@@ -19,7 +19,7 @@ consumer = KafkaConsumer(
   auto_offset_reset="earliest",
   enable_auto_commit=False,
   consumer_timeout_ms=1000,
-  value_deserializer=lambda m: json.loads(m.decode('ascii'))
+  value_deserializer=lambda m: json.loads(m.decode('utf-8'))
 )
 
 topic = "random-pii-text-anon"
@@ -32,9 +32,6 @@ try:
 
         original_json = message.value
         original_text = original_json['inputText']
-        #anonymized_text = original_json['outputText']
-#
-#        print(f"{original_text} -> {anonymized_text}")
         print(f"{message.value}")
 
 except Exception as e:

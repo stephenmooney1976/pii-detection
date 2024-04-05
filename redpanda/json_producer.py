@@ -19,8 +19,8 @@ load_dotenv('redpanda.env', override=True)
 """ create producer """
 producer = KafkaProducer(
     bootstrap_servers = os.environ.get('RPK_BROKERS'),
-    key_serializer=lambda key: json.dumps(key).encode('ascii'),
-    value_serializer=lambda msg: json.dumps(msg).encode('ascii')
+    key_serializer=lambda key: json.dumps(key).encode('utf-8'),
+    value_serializer=lambda msg: json.dumps(msg).encode('utf-8')
 )
 
 topic = "random-pii-text"

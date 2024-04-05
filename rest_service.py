@@ -32,7 +32,8 @@ if __name__ == '__main__':
 
     CORS(app.app)
 
-    serve(app, host='0.0.0.0', port=10995)
+    app.run(host='0.0.0.0', port=10095)
+    #serve(app, host='0.0.0.0', port=10995)
 
   except Exception as e:
     raise e
