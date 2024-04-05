@@ -2,9 +2,9 @@ awscli
 awslambdaric
 boto3
 connexion
+connexion[flask]
 connexion[swagger-ui]
-flask
-flask-cors
+connexion[uvicorn]
 huggingface_hub
 kafka-python
 presidio_analyzer
