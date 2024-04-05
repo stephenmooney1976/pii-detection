@@ -6,6 +6,7 @@ connexion[swagger-ui]
 flask
 flask-cors
 huggingface_hub
+kafka-python
 presidio_analyzer
 presidio_anonymizer
 presidio_image_redactor
